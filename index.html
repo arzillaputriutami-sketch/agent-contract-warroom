@@ -1,65 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Contract War Room — Incident Response Console</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#0f0000;color:#fecaca;min-height:100vh}
-.ember{background-image:radial-gradient(at 50% 100%,rgba(239,68,68,0.15) 0,transparent 50%)}
-.card{background:rgba(127,29,29,0.15);border:1px solid rgba(239,68,68,0.2);border-radius:16px;transition:all .3s}
-.card:hover{border-color:rgba(239,68,68,0.5);box-shadow:0 0 30px rgba(239,68,68,0.1)}
-.severity{padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace}
-.s-critical{background:#dc2626;color:white} .s-high{background:#f97316;color:white} .s-medium{background:#eab308;color:#1a1a1a}
-@keyframes flash{0%,100%{opacity:1}50%{opacity:0.3}}.flash{animation:flash 2s ease-in-out infinite}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Contract Warroom // Mission Control</title>
+  <style>
+    :root{
+      --bg:#0b0e14;
+      --panel:#101722;
+      --panel-2:#151d28;
+      --steel:#273140;
+      --line:#39465a;
+      --text:#d7e1ef;
+      --muted:#77859b;
+      --red:#ff3434;
+      --orange:#ff8a19;
+      --amber:#ffc247;
+      --green:#28e087;
+      --cyan:#5cd7ff;
+      --shadow:0 0 45px rgba(255,52,52,.18);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{
+      min-height:100vh;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 30% 0%, rgba(255,52,52,.12), transparent 32rem),
+        radial-gradient(circle at 88% 12%, rgba(255,138,25,.10), transparent 28rem),
+        linear-gradient(180deg, #0b0e14 0%, #07090d 100%);
+    }
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:3;
+      background:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size:100% 4px;mix-blend-mode:overlay;opacity:.4;
+    }
+    body:after{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+      background-image:linear-gradient(rgba(92,215,255,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(92,215,255,.035) 1px, transparent 1px);
+      background-size:64px 64px;mask-image:radial-gradient(circle at center, black 0%, transparent 78%);
+    }
+    .bunker{width:min(1560px,96vw);margin:0 auto;padding:22px 0 36px;position:relative;z-index:4}
+    .topbar{
+      height:72px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(21,29,40,.96), rgba(9,12,18,.96));
+      display:flex;align-items:center;justify-content:space-between;padding:0 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+    }
+    .topbar:before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,var(--red),var(--orange),transparent 70%)}
+    .brand{display:flex;align-items:center;gap:16px}.insignia{width:42px;height:42px;border:2px solid var(--red);border-radius:50%;display:grid;place-items:center;box-shadow:0 0 25px rgba(255,52,52,.45);position:relative}.insignia:before,.insignia:after{content:"";position:absolute;background:var(--red)}.insignia:before{width:54px;height:2px}.insignia:after{height:54px;width:2px}.insignia span{width:10px;height:10px;background:var(--orange);border-radius:50%;z-index:1;animation:pulse 1.4s infinite}.brand h1{font-size:20px;letter-spacing:.18em;text-transform:uppercase}.brand p,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}.brand p{color:var(--orange);font-size:11px;letter-spacing:.26em;margin-top:4px}.clock{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;text-align:right;color:var(--cyan);font-size:13px;letter-spacing:.14em}.clock strong{display:block;color:#fff;font-size:20px;letter-spacing:.08em}
+    .wall{display:grid;grid-template-columns:1.45fr .9fr;gap:18px;margin-top:18px;align-items:stretch}.main-screen,.side-stack>section,.lower-bay>section{border:1px solid var(--line);background:linear-gradient(180deg, rgba(16,23,34,.94), rgba(7,10,15,.96));box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 18px 50px rgba(0,0,0,.35);position:relative;overflow:hidden}.main-screen{min-height:560px;padding:24px}.screen-title{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(119,133,155,.28);padding-bottom:14px;margin-bottom:18px}.kicker{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:var(--orange);font-size:11px;letter-spacing:.22em;text-transform:uppercase}.screen-title h2{font-size:42px;line-height:.95;text-transform:uppercase;letter-spacing:.04em;margin-top:7px}.alert-strip{display:flex;gap:10px;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(255,52,52,.35),rgba(255,138,25,.16),transparent);border-left:5px solid var(--red);padding:10px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;animation:glow 1.7s infinite}.blink{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 18px var(--red);animation:pulse .9s infinite}
+    .incident-wall{display:flex;flex-direction:column;gap:13px}.incident{display:grid;grid-template-columns:110px 1fr 155px;gap:16px;align-items:center;border:1px solid rgba(119,133,155,.25);background:rgba(255,255,255,.025);padding:14px 16px;position:relative}.incident:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}.incident.critical:before{background:var(--red);box-shadow:0 0 18px var(--red)}.incident.high:before{background:var(--orange)}.incident.elevated:before{background:var(--amber)}.sev{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;text-align:center;border:1px solid currentColor;padding:8px 4px;font-size:12px;letter-spacing:.12em}.critical .sev{color:var(--red);background:rgba(255,52,52,.08)}.high .sev{color:var(--orange);background:rgba(255,138,25,.08)}.elevated .sev{color:var(--amber);background:rgba(255,194,71,.08)}.incident h3{text-transform:uppercase;font-size:16px;letter-spacing:.04em}.incident p{color:var(--muted);font-size:13px;margin-top:5px}.metric{text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}.metric strong{display:block;color:#fff;font-size:22px}.metric span{color:var(--muted);font-size:11px}.mapline{height:92px;margin:18px 0;border:1px solid rgba(92,215,255,.2);background:linear-gradient(90deg,rgba(92,215,255,.05),transparent),repeating-linear-gradient(90deg,transparent 0 37px,rgba(92,215,255,.08) 38px 39px);position:relative;overflow:hidden}.mapline .trace{position:absolute;left:-25%;top:46px;height:2px;width:55%;background:linear-gradient(90deg,transparent,var(--cyan),var(--red));box-shadow:0 0 18px var(--cyan);animation:sweep 4s linear infinite}.mapline .node{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 18px var(--red)}.n1{left:18%;top:36px}.n2{left:47%;top:54px}.n3{left:76%;top:28px}.n4{left:88%;top:60px;background:var(--orange)!important}
+    .side-stack{display:flex;flex-direction:column;gap:18px}.defcon{padding:20px;min-height:272px}.defcon-display{display:grid;grid-template-columns:178px 1fr;gap:18px;margin-top:16px;align-items:center}.dial{width:170px;height:170px;border-radius:50%;border:14px solid #222c39;border-top-color:var(--red);border-right-color:var(--orange);display:grid;place-items:center;box-shadow:0 0 40px rgba(255,52,52,.22);position:relative}.dial:after{content:"";position:absolute;inset:18px;border:1px dashed rgba(255,255,255,.16);border-radius:50%}.dial b{font-size:58px;color:#fff;z-index:1}.levels{display:flex;flex-direction:column-reverse;gap:7px}.level{height:22px;border:1px solid rgba(119,133,155,.25);background:rgba(255,255,255,.03);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;padding:3px 8px;color:var(--muted)}.level.hot{background:linear-gradient(90deg,rgba(255,52,52,.65),rgba(255,138,25,.25));color:#fff;border-color:var(--red)}.scanner{padding:18px}.scan-row{display:grid;grid-template-columns:1fr 80px 82px;gap:10px;padding:10px 0;border-bottom:1px solid rgba(119,133,155,.18);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.scan-row span:nth-child(2){color:var(--orange)}.scan-row strong{color:var(--red);text-align:right}.bar{height:7px;background:#222c39;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--red));box-shadow:0 0 18px var(--red)}
+    .lower-bay{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;margin-top:18px}.timeline,.patches,.terminal,.lookup{padding:18px}.timeline-track{position:relative;margin-top:14px;padding-left:28px}.timeline-track:before{content:"";position:absolute;left:9px;top:4px;bottom:4px;width:2px;background:linear-gradient(var(--red),var(--orange),var(--cyan))}.event{position:relative;margin-bottom:16px}.event:before{content:"";position:absolute;left:-24px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--orange);box-shadow:0 0 14px var(--orange)}.event.now:before{background:var(--red);box-shadow:0 0 18px var(--red)}.event time{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:var(--cyan);font-size:11px}.event b{display:block;text-transform:uppercase;font-size:14px;margin:2px 0}.event p{color:var(--muted);font-size:12px}.patch-row{display:grid;grid-template-columns:120px 1fr 74px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(119,133,155,.18);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.progress{height:10px;background:#202a37;border:1px solid rgba(119,133,155,.2);overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--green))}.patch-row.warning .progress i{background:linear-gradient(90deg,var(--orange),var(--red))}.terminal{margin-top:18px;min-height:260px}.console{height:195px;overflow:hidden;background:#05070a;border:1px solid rgba(40,224,135,.22);padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#83f7b8;line-height:1.55;box-shadow:inset 0 0 28px rgba(40,224,135,.04)}.console .warn{color:var(--orange)}.console .bad{color:var(--red)}.console .dim{color:#4b7d63}.lookup{margin-top:18px}.lookup form{display:grid;grid-template-columns:1fr 120px;gap:10px;margin-top:14px}.lookup input{background:#070a10;border:1px solid rgba(119,133,155,.35);color:#fff;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;outline:none}.lookup button{background:linear-gradient(180deg,var(--red),#9c1717);border:1px solid var(--orange);color:#fff;font-weight:800;letter-spacing:.08em;cursor:pointer}.result{margin-top:12px;border-left:4px solid var(--orange);background:rgba(255,138,25,.08);padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#ffd7ad;min-height:58px}.section-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(119,133,155,.25);padding-bottom:10px}.section-head h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase}.tag{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;color:var(--muted);border:1px solid rgba(119,133,155,.32);padding:4px 7px}.red{color:var(--red)}.orange{color:var(--orange)}.green{color:var(--green)}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(255,52,52,0)}50%{box-shadow:0 0 30px rgba(255,52,52,.22)}}@keyframes sweep{to{left:110%}}
+    @media (max-width:1050px){.wall,.lower-bay{grid-template-columns:1fr}.incident{grid-template-columns:95px 1fr}.metric{grid-column:2;text-align:left}.defcon-display{grid-template-columns:1fr}.topbar{height:auto;gap:16px;align-items:flex-start;flex-direction:column;padding:18px}.screen-title{flex-direction:column;gap:12px}.screen-title h2{font-size:32px}.lookup form{grid-template-columns:1fr}.patch-row{grid-template-columns:1fr}.scan-row{grid-template-columns:1fr}.clock{text-align:left}}
+  </style>
 </head>
-<body class="ember">
-<div class="max-w-7xl mx-auto px-6 py-8">
-  <div class="flex items-center justify-between mb-8">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center flash">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+<body>
+  <main class="bunker">
+    <header class="topbar">
+      <div class="brand">
+        <div class="insignia" aria-hidden="true"><span></span></div>
+        <div>
+          <h1>Agent Contract Warroom</h1>
+          <p>MISSION CONTROL / INCIDENT RESPONSE BUNKER</p>
+        </div>
       </div>
-      <div><h1 class="text-2xl font-bold text-white">War Room</h1><p class="text-xs text-red-400 tracking-wider font-mono">INCIDENT RESPONSE CONSOLE</p></div>
-    </div>
-    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500 flash"></div><span class="text-sm text-red-400 font-mono font-bold">2 ACTIVE INCIDENTS</span></div>
-  </div>
-  <div class="grid grid-cols-4 gap-4 mb-6">
-    <div class="card p-5"><p class="text-xs text-red-700 mb-1">Active Incidents</p><p class="text-3xl font-bold text-red-400">2</p></div>
-    <div class="card p-5"><p class="text-xs text-red-700 mb-1">Monitored Contracts</p><p class="text-3xl font-bold">3,456</p></div>
-    <div class="card p-5"><p class="text-xs text-red-700 mb-1">Response Time</p><p class="text-3xl font-bold">12<span class="text-lg">sec</span></p></div>
-    <div class="card p-5"><p class="text-xs text-red-700 mb-1">Funds at Risk</p><p class="text-3xl font-bold text-red-400">$12.8M</p></div>
-  </div>
-  <div class="card p-6 mb-6">
-    <div class="flex items-center gap-3 mb-4">
-      <span class="severity s-critical">CRITICAL</span>
-      <h3 class="text-sm font-semibold text-white">Active Incident: Suspicious Drain on 0x3fC9...7B2d</h3>
-    </div>
-    <div class="grid grid-cols-3 gap-4 mb-4">
-      <div class="p-3 rounded-lg bg-red-900/30"><p class="text-xs text-red-700 mb-1">Funds Moved</p><p class="text-lg font-bold text-red-400">$8.4M</p></div>
-      <div class="p-3 rounded-lg bg-red-900/30"><p class="text-xs text-red-700 mb-1">Transactions</p><p class="text-lg font-bold">234</p></div>
-      <div class="p-3 rounded-lg bg-red-900/30"><p class="text-xs text-red-700 mb-1">Time Elapsed</p><p class="text-lg font-bold">4m 23s</p></div>
-    </div>
-    <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-4">
-      <p class="text-sm font-semibold text-red-300 mb-2">AI Incident Analysis</p>
-      <p class="text-xs text-gray-400 leading-relaxed">Detected unauthorized proxy implementation upgrade on lending contract. New implementation contains withdrawal function accessible only from attacker EOA. 12 parallel agents analyzing attack vector, estimating $12.8M total exposure. Recommended: Emergency pause via governance multisig, contact Flashbots for MEV protection on remaining funds.</p>
-    </div>
-    <div class="flex gap-3">
-      <button class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-500 transition">Emergency Pause</button>
-      <button class="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-semibold hover:bg-white/20 transition">View Tx Details</button>
-    </div>
-  </div>
-  <div class="card p-6">
-    <h3 class="text-sm font-semibold text-red-300 mb-4">Recent Incident Timeline</h3>
-    <div class="space-y-3">
-      <div class="flex gap-4 items-start"><div class="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0"></div><div><p class="text-sm font-medium text-white">Flash loan attack detected on Yearn Vault</p><p class="text-xs text-gray-500">2 hours ago · $2.1M at risk · Auto-paused</p></div></div>
-      <div class="flex gap-4 items-start"><div class="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0"></div><div><p class="text-sm font-medium text-white">Unusual approval pattern on Compound fork</p><p class="text-xs text-gray-500">5 hours ago · Under investigation · 12 wallets flagged</p></div></div>
-      <div class="flex gap-4 items-start"><div class="w-2 h-2 rounded-full bg-emerald-500 mt-2 shrink-0"></div><div><p class="text-sm font-medium text-white">Reentrancy attempt blocked on Aave V3</p><p class="text-xs text-gray-500">1 day ago · $0 lost · Agent intervened in 8s</p></div></div>
-    </div>
-  </div>
-</div>
+      <div class="clock"><span>UTC MISSION TIME</span><strong id="clock">--:--:--</strong></div>
+    </header>
+
+    <section class="wall" aria-label="Primary mission control wall">
+      <div class="main-screen">
+        <div class="screen-title">
+          <div><span class="kicker">Wall Screen Alpha // Active Incident Wall</span><h2>Threat Board Live</h2></div>
+          <div class="alert-strip"><span class="blink"></span> 3 ACTIVE INCIDENTS // FUNDS AT RISK $18.7M // RESPONSE TEAMS DEPLOYED</div>
+        </div>
+        <div class="mapline" aria-hidden="true"><span class="trace"></span><span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span></div>
+        <div class="incident-wall">
+          <article class="incident critical">
+            <div class="sev">SEV-1<br>CRITICAL</div>
+            <div><h3>Proxy implementation hijack // 0x3fC9...7B2d</h3><p>Unauthorized upgrade path detected. Drain function reachable from attacker EOA. Multisig pause instruction queued.</p></div>
+            <div class="metric"><strong>$12.8M</strong><span>EXPOSURE / T+04:23</span></div>
+          </article>
+          <article class="incident high">
+            <div class="sev">SEV-2<br>HIGH</div>
+            <div><h3>Flash-loan oracle displacement // 0xa91E...44c0</h3><p>Price feed deviated 41.6% across two blocks. Liquidation circuit breaker armed; MEV relay contacted.</p></div>
+            <div class="metric"><strong>$4.6M</strong><span>AT RISK / 118 TX</span></div>
+          </article>
+          <article class="incident elevated">
+            <div class="sev">SEV-3<br>ELEVATED</div>
+            <div><h3>Infinite approval swarm // 0x71Db...f908</h3><p>214 wallets signed anomalous spender approvals matching known phishing kit byte patterns.</p></div>
+            <div class="metric"><strong>$1.3M</strong><span>USER FUNDS / 214 WALLETS</span></div>
+          </article>
+        </div>
+      </div>
+
+      <div class="side-stack">
+        <section class="defcon">
+          <div class="section-head"><h2>Threat Level Indicator</h2><span class="tag">DEFCON STYLE</span></div>
+          <div class="defcon-display">
+            <div class="dial"><b>2</b></div>
+            <div class="levels">
+              <div class="level">DEFCON 5 // NORMAL WATCH</div>
+              <div class="level">DEFCON 4 // ELEVATED</div>
+              <div class="level">DEFCON 3 // READY TEAMS</div>
+              <div class="level hot">DEFCON 2 // ACTIVE BREACH</div>
+              <div class="level">DEFCON 1 // TOTAL LOCKDOWN</div>
+            </div>
+          </div>
+          <p class="mono" style="color:var(--muted);font-size:12px;margin-top:14px">Current posture: emergency response cells online, governance signers notified, patch canaries under active telemetry.</p>
+        </section>
+
+        <section class="scanner">
+          <div class="section-head"><h2>Contract Vulnerability Scanner</h2><span class="tag">LIVE SWEEP</span></div>
+          <div class="scan-row"><span>unchecked-call return paths</span><span>1,482 hits</span><strong>HIGH</strong></div>
+          <div class="bar"><i style="width:78%"></i></div>
+          <div class="scan-row"><span>delegatecall upgrade drift</span><span>19 hits</span><strong>CRIT</strong></div>
+          <div class="bar"><i style="width:92%"></i></div>
+          <div class="scan-row"><span>oracle freshness expired</span><span>63 hits</span><strong>MED</strong></div>
+          <div class="bar"><i style="width:54%"></i></div>
+          <div class="scan-row"><span>privileged role entropy</span><span>8 hits</span><strong>HIGH</strong></div>
+          <div class="bar"><i style="width:66%"></i></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="lower-bay" aria-label="Response operations consoles">
+      <div>
+        <section class="timeline">
+          <div class="section-head"><h2>Incident Response Mission Timeline</h2><span class="tag">T-MINUS / T-PLUS</span></div>
+          <div class="timeline-track">
+            <div class="event"><time>T-00:06:12</time><b>Anomaly triangulated</b><p>Agent swarm correlated mempool burst, proxy admin mutation, and bridge outflow.</p></div>
+            <div class="event"><time>T-00:03:44</time><b>Containment route calculated</b><p>Pause calldata generated; safe signer quorum located across three time zones.</p></div>
+            <div class="event now"><time>T+00:00:00</time><b>Incident command opened</b><p>War room escalated to DEFCON 2. Public comms draft locked for legal review.</p></div>
+            <div class="event"><time>T+00:04:23</time><b>Countermeasure broadcast pending</b><p>Transaction bundle staged through private relay to minimize frontrun exposure.</p></div>
+          </div>
+        </section>
+
+        <section class="terminal">
+          <div class="section-head"><h2>Audit Log Terminal</h2><span class="tag">APPEND ONLY</span></div>
+          <div class="console" id="console">
+            <div><span class="dim">[02:14:08]</span> boot incident-room kernel: chain monitors synchronized</div>
+            <div><span class="dim">[02:14:11]</span> signer beacon ping returned 5/7 reachable</div>
+            <div class="warn"><span class="dim">[02:15:02]</span> oracle TWAP guard deviation exceeds threshold</div>
+            <div class="bad"><span class="dim">[02:15:49]</span> proxy implementation hash unknown: 0x88f2...c401</div>
+            <div><span class="dim">[02:16:13]</span> generated pause calldata: verified against ABI v4.2</div>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="patches">
+          <div class="section-head"><h2>Patch Deployment Status Board</h2><span class="tag">RELEASE TRAIN</span></div>
+          <div class="patch-row"><span>HOTFIX-191</span><div class="progress"><i style="width:86%"></i></div><span class="green">86%</span></div>
+          <div class="patch-row warning"><span>PAUSE-BUNDLE</span><div class="progress"><i style="width:61%"></i></div><span class="orange">61%</span></div>
+          <div class="patch-row"><span>ORACLE-GUARD</span><div class="progress"><i style="width:100%"></i></div><span class="green">LIVE</span></div>
+          <div class="patch-row"><span>ROLE-ROTATE</span><div class="progress"><i style="width:43%"></i></div><span>43%</span></div>
+          <div class="patch-row warning"><span>BRIDGE-LIMIT</span><div class="progress"><i style="width:72%"></i></div><span class="orange">72%</span></div>
+        </section>
+
+        <section class="lookup">
+          <div class="section-head"><h2>Exploit Database Quick Lookup</h2><span class="tag">LOCAL MIRROR</span></div>
+          <form id="lookupForm">
+            <input id="lookupInput" type="text" value="delegatecall proxy takeover" aria-label="Exploit search term" />
+            <button type="submit">QUERY</button>
+          </form>
+          <div class="result" id="lookupResult">MATCH: EDB-SC-2026-014 // delegatecall proxy takeover // mitigations: freeze admin, compare implementation bytecode, revoke emergency upgrader, route treasury to cold vault.</div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const clock=document.getElementById('clock');
+    function tick(){clock.textContent=new Date().toISOString().slice(11,19)+'Z'}
+    tick(); setInterval(tick,1000);
+
+    const log=document.getElementById('console');
+    const lines=[
+      ['ok','private relay simulation accepted bundle id 71B-ALPHA'],
+      ['warn','new spender approval cluster detected: 37 wallets / 90 sec'],
+      ['ok','canary patch telemetry nominal on fork block 20188472'],
+      ['bad','attacker EOA attempted second drain path: reverted by pause guard'],
+      ['ok','snapshot for post-incident forensic package sealed']
+    ];
+    let idx=0;
+    setInterval(()=>{
+      const now=new Date().toISOString().slice(11,19);
+      const [type,msg]=lines[idx++%lines.length];
+      const div=document.createElement('div');
+      div.className=type==='bad'?'bad':type==='warn'?'warn':'';
+      div.innerHTML='<span class="dim">['+now+']</span> '+msg;
+      log.appendChild(div);
+      while(log.children.length>9) log.removeChild(log.firstChild);
+      log.scrollTop=log.scrollHeight;
+    },2400);
+
+    const db={
+      reentrancy:'MATCH: EDB-SC-2025-031 // cross-function reentrancy // mitigations: checks-effects-interactions, mutex guard, vault accounting snapshot.',
+      oracle:'MATCH: EDB-SC-2026-002 // oracle manipulation / flash liquidity // mitigations: TWAP windows, circuit breaker, multi-source median.',
+      approval:'MATCH: EDB-SC-2025-109 // malicious allowance campaign // mitigations: spender denylist, revoke flow, user notification blast.',
+      delegatecall:'MATCH: EDB-SC-2026-014 // delegatecall proxy takeover // mitigations: freeze admin, compare implementation bytecode, revoke emergency upgrader.',
+      bridge:'MATCH: EDB-SC-2024-088 // bridge message replay // mitigations: nonce quarantine, relayer rotation, finality delay.'
+    };
+    document.getElementById('lookupForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      const q=document.getElementById('lookupInput').value.toLowerCase();
+      const hit=Object.keys(db).find(k=>q.includes(k));
+      document.getElementById('lookupResult').textContent=hit?db[hit]:'NO EXACT MATCH // heuristic scan queued // suggested terms: reentrancy, oracle, approval, delegatecall, bridge';
+    });
+  </script>
 </body>
 </html>
